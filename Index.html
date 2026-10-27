@@ -1,50 +1,333 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WorldCore</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WorldCore LP APR Calculator</title>
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      background: #101827;
-      color: white;
+      margin: 0;
+      padding: 24px 16px;
+      background: #0b1020;
+      color: #f5f7ff;
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px 20px;
     }
 
-    h1 {
-      color: #38bdf8;
+    .app {
+      max-width: 760px;
+      margin: auto;
     }
+
+    .brand {
+      color: #8ba7ff;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    h1 { margin-bottom: 8px; }
+    .muted { color: #aab4ca; line-height: 1.6; }
+
+    .panel {
+      background: #151d31;
+      border: 1px solid #293650;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      color: #c6d0e5;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      padding: 12px;
+      color: white;
+      background: #0b1020;
+      border: 1px solid #3a4965;
+      border-radius: 9px;
+      font-size: 15px;
+    }
+
+    input:focus {
+      outline: 2px solid #819bff;
+      outline-offset: 1px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .check input {
+      width: 18px;
+      height: 18px;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      padding: 16px;
+      background: #0b1020;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .metric span {
+      display: block;
+      color: #aab4ca;
+      font-size: 13px;
+      margin-bottom: 9px;
+    }
+
+    .metric strong {
+      font-size: clamp(18px, 4vw, 25px);
+    }
+
+    .highlight { color: #91f5c2; }
 
     button {
-      background: #38bdf8;
-      color: #101827;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      width: 100%;
+      margin-top: 18px;
+      padding: 13px;
+      background: #819bff;
+      color: #0b1020;
+      border: 0;
+      border-radius: 9px;
+      font-size: 15px;
       font-weight: bold;
+      cursor: pointer;
+    }
+
+    .warning {
+      border-left: 3px solid #e7bb68;
+      padding-left: 12px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      .fields, .results { grid-template-columns: 1fr; }
+      .panel { padding: 15px; }
     }
   </style>
 </head>
+
 <body>
-  <h1>🌐 WorldCore</h1>
-  <p>Your Web3 Trading & NFT Platform</p>
+  <main class="app">
+    <div class="brand">WORLDCORE • DEFI TOOLS</div>
+    <h1>LP APR Calculator</h1>
+    <p class="muted">
+      Estimate liquidity pool returns from trading fees
+      and reward campaigns. Change the inputs to compare pools.
+    </p>
 
-  <button id="nftButton">Create NFT</button>
+    <section class="panel">
+      <h2>1. Pool information</h2>
+      <div class="fields">
+        <div>
+          <label for="network">Network</label>
+          <input id="network" value="Custom Network" />
+        </div>
+        <div>
+          <label for="pair">Token pair</label>
+          <input id="pair" value="TOKEN0 / TOKEN1" />
+        </div>
+        <div>
+          <label for="deposit">Your deposit value (USD)</label>
+          <input id="deposit" type="number" min="0"
+            step="any" value="1000" />
+        </div>
+        <div>
+          <label for="tvl">Pool TVL (USD)</label>
+          <input id="tvl" type="number" min="0"
+            step="any" value="100000" />
+        </div>
+        <div>
+          <label for="volume">Daily swap volume (USD)</label>
+          <input id="volume" type="number" min="0"
+            step="any" value="25000" />
+        </div>
+        <div>
+          <label for="fee">LP swap fee (%)</label>
+          <input id="fee" type="number" min="0" max="100"
+            step="any" value="0.30" />
+        </div>
+        <div>
+          <label for="share">Your share of active liquidity (%)</label>
+          <input id="share" type="number" min="0" max="100"
+            step="any" value="1" />
+        </div>
+        <div>
+          <label for="rewards">Daily rewards (USD)</label>
+          <input id="rewards" type="number" min="0"
+            step="any" value="2" />
+        </div>
+      </div>
 
-  <p id="message">Welcome to WorldCore!</p>
+      <label class="check">
+        <input id="inRange" type="checkbox" checked />
+        <span>My concentrated-liquidity position is in range</span>
+      </label>
+
+      <p class="muted" style="font-size:13px">
+        Enter your actual share of active liquidity, not your
+        share of the pool's total TVL. For a full-range pool,
+        leave this box checked if your liquidity is active.
+      </p>
+
+      <button id="calculate" type="button">Calculate APR</button>
+    </section>
+
+    <section class="panel" aria-live="polite">
+      <h2>2. Estimated results</h2>
+      <p id="pairLabel" class="muted">TOKEN0 / TOKEN1 · Custom Network</p>
+
+      <div class="results">
+        <div class="metric">
+          <span>Daily swap fees</span>
+          <strong id="dailyFees">$0.00</strong>
+        </div>
+        <div class="metric">
+          <span>Daily token rewards</span>
+          <strong id="dailyRewards">$0.00</strong>
+        </div>
+        <div class="metric">
+          <span>Total estimated daily income</span>
+          <strong id="dailyTotal">$0.00</strong>
+        </div>
+        <div class="metric">
+          <span>Estimated annual income</span>
+          <strong id="annualIncome">$0.00</strong>
+        </div>
+        <div class="metric">
+          <span>Fee APR</span>
+          <strong id="feeAPR">0.00%</strong>
+        </div>
+        <div class="metric">
+          <span>Total estimated APR</span>
+          <strong id="totalAPR" class="highlight">0.00%</strong>
+        </div>
+      </div>
+
+      <p id="status" class="muted"></p>
+      <p class="warning">
+        Estimate only. Assumes daily volume, fee rate, active
+        liquidity share, and rewards remain constant for 365 days.
+        Excludes gas, price changes, impermanent loss, taxes,
+        and other costs. Rewards are assumed to be USD values.
+      </p>
+    </section>
+  </main>
 
   <script>
-    const button = document.getElementById("nftButton");
-    const message = document.getElementById("message");
+    const $ = (id) => document.getElementById(id);
 
-    button.addEventListener("click", function () {
-      message.textContent =
-        "Your NFT creation journey starts here!";
+    function number(id) {
+      return Number($(id).value);
+    }
+
+    function money(value) {
+      return value.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 2
+      });
+    }
+
+    function percent(value) {
+      return Number.isFinite(value)
+        ? value.toFixed(2) + "%"
+        : "N/A";
+    }
+
+    function calculate() {
+      const deposit = number("deposit");
+      const tvl = number("tvl");
+      const volume = number("volume");
+      const feePercent = number("fee");
+      const sharePercent = number("share");
+      const rewards = number("rewards");
+      const inRange = $("inRange").checked;
+
+      const values = [
+        deposit, tvl, volume, feePercent, sharePercent, rewards
+      ];
+
+      if (
+        values.some(v => !Number.isFinite(v) || v < 0) ||
+        feePercent > 100 ||
+        sharePercent > 100
+      ) {
+        $("status").textContent =
+          "Please enter valid non-negative values. Fee and share percentages must not exceed 100.";
+        return;
+      }
+
+      if (deposit <= 0 || tvl <= 0) {
+        $("status").textContent =
+          "Deposit value and pool TVL must both be greater than zero.";
+        return;
+      }
+
+      // Fee rate is a percentage, so 0.30% becomes 0.003.
+      const dailyFees = inRange
+        ? volume * (feePercent / 100) * (sharePercent / 100)
+        : 0;
+
+      // Rewards are entered as the user's daily USD reward.
+      const dailyRewards = rewards;
+      const dailyTotal = dailyFees + dailyRewards;
+      const annualIncome = dailyTotal * 365;
+
+      const feeAPR = (dailyFees * 365 / deposit) * 100;
+      const totalAPR = (annualIncome / deposit) * 100;
+
+      $("dailyFees").textContent = money(dailyFees);
+      $("dailyRewards").textContent = money(dailyRewards);
+      $("dailyTotal").textContent = money(dailyTotal);
+      $("annualIncome").textContent = money(annualIncome);
+      $("feeAPR").textContent = percent(feeAPR);
+      $("totalAPR").textContent = percent(totalAPR);
+
+      $("pairLabel").textContent =
+        ($("pair").value.trim() || "Unnamed pair") +
+        " · " + ($("network").value.trim() || "Unnamed network");
+
+      $("status").textContent = inRange
+        ? "Fee estimate assumes your entered active-liquidity share remains constant."
+        : "Out of range: swap fees are set to zero. Rewards remain included and may depend on campaign eligibility.";
+    }
+
+    $("calculate").addEventListener("click", calculate);
+
+    // Recalculate when any input changes.
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", calculate);
+      input.addEventListener("change", calculate);
     });
+
+    calculate();
   </script>
 </body>
 </html>
